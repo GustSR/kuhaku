@@ -1,0 +1,15 @@
+{
+  "name": "kuhaku-backend",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.27.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
