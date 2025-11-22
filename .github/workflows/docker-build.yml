@@ -262,14 +262,23 @@ jobs:
             -p 3000:3000 \
             ${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}/frontend:${{ github.ref_name }}-${{ steps.sha.outputs.short }}
 
-          # Wait for container to be ready
-          sleep 15
+          # Wait for container to be healthy (max 60s)
+          echo "Waiting for frontend container to be healthy..."
+          for i in {1..12}; do
+            HEALTH=$(docker inspect --format='{{.State.Health.Status}}' test-frontend 2>/dev/null || echo "none")
+            if [ "$HEALTH" = "healthy" ]; then
+              echo "Container is healthy!"
+              break
+            fi
+            echo "Attempt $i/12: Health status is $HEALTH, waiting 5s..."
+            sleep 5
+          done
 
           # Check if container is running
           docker ps | grep test-frontend
 
-          # Check health
-          curl -f http://localhost:3000/ || exit 1
+          # Check health endpoint with retries
+          curl -f --retry 3 --retry-delay 2 http://localhost:3000/ || exit 1
 
           # Cleanup
           docker stop test-frontend
